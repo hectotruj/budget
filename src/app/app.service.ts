@@ -5,7 +5,7 @@ import 'rxjs/add/operator/map';
 
 @Injectable()
 export class TransactionService {
-    private headers = new Headers({ 'Content-Type': 'application/json' });
+    private headers = new Headers({'Content-Type': 'application/json'});
     constructor(private http: Http) { }
     search(): Observable<JSON[]> {
         let args = {
@@ -19,8 +19,8 @@ export class TransactionService {
             }
         };
         return this.http
-            .post(`https://2016.api.levelmoney.com/api/v2/core/get-all-transactions`, JSON.stringify(args), { headers: this.headers })
-            .map(response => response.json() as JSON[]);
+            .post(`https://2016.api.levelmoney.com/api/v2/core/get-all-transactions`, JSON.stringify(args), {headers: this.headers})
+            .map(response => response.json().transactions as JSON[]);
     } // get transactions
 }
 
