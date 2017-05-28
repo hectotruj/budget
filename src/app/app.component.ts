@@ -8,23 +8,29 @@ import { TransactionService } from './app.service';
 })
 export class AppComponent {
   private transactionsGainedByDate: Map<string, number>;
+  private sumGained: number;
+
   private transactionsSpentByDate: Map<string, number>;
+  private sumSpent: number;
+
   private transactionDates: Map<string, string>;
 
   constructor(private transactionService: TransactionService) {
     transactionService.search().subscribe(
       transactions => {
 
-        //reset maps
+        //reset variables
         this.transactionsGainedByDate = new Map();
+        this.sumGained = 0;
         this.transactionsSpentByDate = new Map();
+        this.sumSpent = 0;
         this.transactionDates = new Map();
 
         transactions.forEach((transaction: JSON) => {
 
           //format date
-          let transactionYear: number = new Date(transaction['transaction-time']).getFullYear();
-          let transactionMonth: number = new Date(transaction['transaction-time']).getMonth() + 1;
+          let transactionYear: string = new Date(transaction['transaction-time']).getFullYear().toString();
+          let transactionMonth: string = this.formatMonth(new Date(transaction['transaction-time']).getMonth() + 1);
           let transactionDate: string = transactionYear + '-' + transactionMonth;
 
           //add date to map to later relate
@@ -38,6 +44,8 @@ export class AppComponent {
             else {
               this.transactionsSpentByDate.set(transactionDate, transaction['amount']);
             }// else just add the current value
+
+            this.sumSpent += (-1)*transaction['amount'];
           }//check if money was spent
           else {
             if (this.transactionsGainedByDate.has(transactionDate)) {
@@ -47,6 +55,7 @@ export class AppComponent {
             else {
               this.transactionsGainedByDate.set(transactionDate, transaction['amount']);
             }// else just add the current value
+            this.sumGained += transaction['amount'];
           }//money was gained
         })
       }, // While receiving transactions
@@ -65,13 +74,19 @@ export class AppComponent {
       let monthSpentAmount = this.transactionsSpentByDate.has(date) ? this.formatAmount(this.transactionsSpentByDate.get(date)) : '0.00';
       let monthGainedAmount = this.transactionsGainedByDate.has(date) ? this.formatAmount(this.transactionsGainedByDate.get(date)) : '0.00';
       balancesObject[date] = { 'spent': '$' + monthSpentAmount, 'income': '$' + monthGainedAmount };
-    })
+    })//for each date, add it to the object
+
+    balancesObject['average'] = { 'spent': '$' + this.formatAmount(this.sumSpent/this.transactionsSpentByDate.size), 'income': '$' + this.formatAmount(this.sumGained/this.transactionsGainedByDate.size) };
     console.log(JSON.stringify(balancesObject));
-  }
+  } //Format desired output
 
   private formatAmount(amount: number): string {
     return (amount / 100).toFixed(2);
-  }
+  } //Format transaction amounts to show decimals
+
+  private formatMonth(month: number): string {
+    return month < 10 ? '0' + month : month.toString();
+  } //Format month to have leading 0
 
   title = 'app works!';
 }
