@@ -39,10 +39,10 @@ export class AppComponent {
           if (transaction['amount'] < 0) {
             if (this.transactionsSpentByDate.has(transactionDate)) {
               this.transactionsSpentByDate.set(transactionDate,
-                this.transactionsSpentByDate.get(transactionDate) + transaction['amount']);
+                this.transactionsSpentByDate.get(transactionDate) + (-1)*transaction['amount']);
             } // check if this date is already in map 
             else {
-              this.transactionsSpentByDate.set(transactionDate, transaction['amount']);
+              this.transactionsSpentByDate.set(transactionDate, (-1)*transaction['amount']);
             }// else just add the current value
 
             this.sumSpent += (-1)*transaction['amount'];
