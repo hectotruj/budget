@@ -1,9 +1,6 @@
 {
-<<<<<<< HEAD
   "name": "budget",
-=======
-  "name": "my-app",
->>>>>>> 534b4e25668200509702d4b1a60b130263bb1569
+
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
