@@ -1,4 +1,4 @@
-export class Transaction {
+export class MoneyFlow {
     private spent: number = 0;
     private gained: number = 0;
 
