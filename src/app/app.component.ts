@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TransactionService } from './app.service';
+import { Transaction } from './transaction';
 
 @Component({
   selector: 'app-root',
@@ -7,24 +8,14 @@ import { TransactionService } from './app.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  private transactionsGainedByDate: Map<string, number>;
-  private sumGained: number;
-
-  private transactionsSpentByDate: Map<string, number>;
-  private sumSpent: number;
-
-  private transactionDates: Map<string, string>;
+  private transactionsByDate: Map<string, Transaction>;
 
   constructor(private transactionService: TransactionService) {
     transactionService.search().subscribe(
       transactions => {
 
         //reset variables
-        this.transactionsGainedByDate = new Map();
-        this.sumGained = 0;
-        this.transactionsSpentByDate = new Map();
-        this.sumSpent = 0;
-        this.transactionDates = new Map();
+        this.transactionsByDate = new Map();
 
         transactions.forEach((transaction: JSON) => {
 
@@ -33,29 +24,21 @@ export class AppComponent {
           let transactionMonth: string = this.formatMonth(new Date(transaction['transaction-time']).getMonth() + 1);
           let transactionDate: string = transactionYear + '-' + transactionMonth;
 
+          let amount: number = transaction['amount'];
+
           //add date to map to later relate
-          this.transactionDates.set(transactionDate, transactionDate);
+          //this.transactionDates.set(transactionDate, transactionDate);
+          if (this.transactionsByDate.has(transactionDate)) {
+            var curTransaction: Transaction = this.transactionsByDate.get(transactionDate);
 
-          if (transaction['amount'] < 0) {
-            if (this.transactionsSpentByDate.has(transactionDate)) {
-              this.transactionsSpentByDate.set(transactionDate,
-                this.transactionsSpentByDate.get(transactionDate) + (-1)*transaction['amount']);
-            } // check if this date is already in map 
-            else {
-              this.transactionsSpentByDate.set(transactionDate, (-1)*transaction['amount']);
-            }// else just add the current value
-
-            this.sumSpent += (-1)*transaction['amount'];
-          }//check if money was spent
+              curTransaction.addAmount(amount);
+              this.transactionsByDate.set(transactionDate, curTransaction);
+            //check if money was gained
+          }//check if date is in map
           else {
-            if (this.transactionsGainedByDate.has(transactionDate)) {
-              this.transactionsGainedByDate.set(transactionDate,
-                this.transactionsGainedByDate.get(transactionDate) + transaction['amount']);
-            } // check if this date is already in map 
-            else {
-              this.transactionsGainedByDate.set(transactionDate, transaction['amount']);
-            }// else just add the current value
-            this.sumGained += transaction['amount'];
+            var curTransaction: Transaction = new Transaction();
+            curTransaction.addAmount(amount);
+            this.transactionsByDate.set(transactionDate, curTransaction);
           }//money was gained
         })
       }, // While receiving transactions
@@ -70,15 +53,22 @@ export class AppComponent {
 
   private getMonthlyBalances() {
     var balancesObject = {};
-    this.transactionDates.forEach((date: string) => {
-      let monthSpentAmount = this.transactionsSpentByDate.has(date) ? this.formatAmount(this.transactionsSpentByDate.get(date)) : '0.00';
-      let monthGainedAmount = this.transactionsGainedByDate.has(date) ? this.formatAmount(this.transactionsGainedByDate.get(date)) : '0.00';
-      balancesObject[date] = { 'spent': '$' + monthSpentAmount, 'income': '$' + monthGainedAmount };
+    var spentAmount: number = 0;
+    var gainedAmount: number = 0;
+    
+    this.transactionsByDate.forEach((trans: Transaction, date: string) => {
+      let monthSpentAmount = trans.getSpent();
+      spentAmount += monthSpentAmount;
+
+      let monthGainedAmount = trans.getGained();
+      gainedAmount += monthGainedAmount;
+      balancesObject[date] = { 'spent': '$' + this.formatAmount(monthSpentAmount), 'income': '$' + this.formatAmount(monthGainedAmount) };
     })//for each date, add it to the object
 
-    balancesObject['average'] = { 'spent': '$' + this.formatAmount(this.sumSpent/this.transactionsSpentByDate.size), 'income': '$' + this.formatAmount(this.sumGained/this.transactionsGainedByDate.size) };
-    console.log(JSON.stringify(balancesObject));
-  } //Format desired output
+    balancesObject['average'] = { 'spent': '$' + this.formatAmount(spentAmount / this.transactionsByDate.size), 'income': '$' + this.formatAmount(gainedAmount / this.transactionsByDate.size) };
+
+    console.log(balancesObject)
+  }
 
   private formatAmount(amount: number): string {
     return (amount / 100).toFixed(2);
