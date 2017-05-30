@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { TransactionService, PredictiveService } from './app.service';
 import { MoneyFlow } from './money-flow';
 
+const merchantFilter: string[] = ['Krispy Kreme Donuts', 'Dunkin #336784']
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -10,9 +12,11 @@ import { MoneyFlow } from './money-flow';
 export class AppComponent {
   private moneyFlowByDate: Map<string, MoneyFlow>;
   private predictedMoneyFlowByDate: Map<string, MoneyFlow>;
+  private filteredMoneyFlowByDate: Map<string, MoneyFlow>;
 
   moneyFlowByDateObject;
   predictedMoneyFlowByDateObject;
+  filteredMoneyFlowByDateObject;
 
   constructor(private transactionService: TransactionService, private predictiveService: PredictiveService) {
     transactionService.search().subscribe(
@@ -20,6 +24,8 @@ export class AppComponent {
 
         //reset variables
         this.moneyFlowByDate = new Map();
+        this.filteredMoneyFlowByDate = new Map();
+
         if (typeof transactions != 'undefined') {
           transactions.forEach((transaction: JSON) => {
 
@@ -35,12 +41,26 @@ export class AppComponent {
 
               moneyFlow.addAmount(amount);
               this.moneyFlowByDate.set(transactionDate, moneyFlow);
-            }//check if date is in map
+            }//check if date is in main map
             else {
               var moneyFlow: MoneyFlow = new MoneyFlow();
               moneyFlow.addAmount(amount);
               this.moneyFlowByDate.set(transactionDate, moneyFlow);
-            }//if not in map, add it
+            }//if not in map, add it to main map
+
+            if (!merchantFilter.includes(transaction['merchant'])) {
+              if (this.filteredMoneyFlowByDate.has(transactionDate)) {
+                var moneyFlow: MoneyFlow = this.filteredMoneyFlowByDate.get(transactionDate);
+
+                moneyFlow.addAmount(amount);
+                this.filteredMoneyFlowByDate.set(transactionDate, moneyFlow);
+              }//check if date is in filtered map
+              else {
+                var moneyFlow: MoneyFlow = new MoneyFlow();
+                moneyFlow.addAmount(amount);
+                this.filteredMoneyFlowByDate.set(transactionDate, moneyFlow);
+              }//if not in map, add it to filtered map
+            }// add filters
           })
         }
       }, // While receiving transactions
@@ -77,6 +97,9 @@ export class AppComponent {
 
         this.moneyFlowByDateObject = this.getMonthlyBalances(this.moneyFlowByDate);
         console.log(this.moneyFlowByDateObject)
+
+        this.filteredMoneyFlowByDateObject = this.getMonthlyBalances(this.filteredMoneyFlowByDate);
+        console.log(this.filteredMoneyFlowByDateObject)
 
       }//On subscriber succesful completion
     );
