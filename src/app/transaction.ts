@@ -17,8 +17,8 @@ export class Transaction {
     getSpent() {
         return this.moneyFlow.getSpent();
     }
-    getGained() {
-        return this.moneyFlow.getGained();
+    getIncome() {
+        return this.moneyFlow.getIncome();
     }
     getMoneyFlow() {
         return this.moneyFlow;

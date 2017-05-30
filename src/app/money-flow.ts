@@ -1,17 +1,17 @@
 export class MoneyFlow {
     private spent: number = 0;
-    private gained: number = 0;
+    private income: number = 0;
 
     addAmount(amount: number) {
         if (amount < 0)
             this.spent += (-1) * amount;
         else
-            this.gained += amount;
+            this.income += amount;
     }
     getSpent() {
         return this.spent;
     }
-    getGained() {
-        return this.gained;
+    getIncome() {
+        return this.income;
     }
 }

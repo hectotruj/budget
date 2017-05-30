@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { TransactionService, PredictiveService } from './app.service';
 import { MoneyFlow } from './money-flow';
+import { Transaction } from './transaction';
 
 const merchantFilter: string[] = ['Krispy Kreme Donuts', 'Dunkin #336784']
 
@@ -10,21 +11,21 @@ const merchantFilter: string[] = ['Krispy Kreme Donuts', 'Dunkin #336784']
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  private moneyFlowByDate: Map<string, MoneyFlow>;
-  private predictedMoneyFlowByDate: Map<string, MoneyFlow>;
-  private filteredMoneyFlowByDate: Map<string, MoneyFlow>;
+  private transactionByDate: Map<string, Transaction>;
+  private predictedTransactionByDate: Map<string, Transaction>;
+  private filteredTransactionByDate: Map<string, Transaction>;
 
-  moneyFlowByDateObject;
-  predictedMoneyFlowByDateObject;
-  filteredMoneyFlowByDateObject;
+  transactionByDateObject: JSON[];
+  predictedTransactionByDateObject: JSON[];
+  filteredTransactionByDateObject: JSON[];
 
   constructor(private transactionService: TransactionService, private predictiveService: PredictiveService) {
     transactionService.search().subscribe(
       transactions => {
 
         //reset variables
-        this.moneyFlowByDate = new Map();
-        this.filteredMoneyFlowByDate = new Map();
+        this.transactionByDate = new Map();
+        this.filteredTransactionByDate = new Map();
 
         if (typeof transactions != 'undefined') {
           transactions.forEach((transaction: JSON) => {
@@ -36,29 +37,29 @@ export class AppComponent {
 
             let amount: number = transaction['amount'];
 
-            if (this.moneyFlowByDate.has(transactionDate)) {
-              var moneyFlow: MoneyFlow = this.moneyFlowByDate.get(transactionDate);
+            if (this.transactionByDate.has(transactionDate)) {
+              var curTransaction: Transaction = this.transactionByDate.get(transactionDate);
 
-              moneyFlow.addAmount(amount);
-              this.moneyFlowByDate.set(transactionDate, moneyFlow);
+              curTransaction.addAmount(amount);
+              this.transactionByDate.set(transactionDate, curTransaction);
             }//check if date is in main map
             else {
-              var moneyFlow: MoneyFlow = new MoneyFlow();
-              moneyFlow.addAmount(amount);
-              this.moneyFlowByDate.set(transactionDate, moneyFlow);
+              var curTransaction: Transaction = new Transaction(transactionDate);
+              curTransaction.addAmount(amount);
+              this.transactionByDate.set(transactionDate, curTransaction);
             }//if not in map, add it to main map
 
             if (!merchantFilter.includes(transaction['merchant'])) {
-              if (this.filteredMoneyFlowByDate.has(transactionDate)) {
-                var moneyFlow: MoneyFlow = this.filteredMoneyFlowByDate.get(transactionDate);
+              if (this.filteredTransactionByDate.has(transactionDate)) {
+                var curTransaction: Transaction = this.filteredTransactionByDate.get(transactionDate);
 
-                moneyFlow.addAmount(amount);
-                this.filteredMoneyFlowByDate.set(transactionDate, moneyFlow);
+                curTransaction.addAmount(amount);
+                this.filteredTransactionByDate.set(transactionDate, curTransaction);
               }//check if date is in filtered map
               else {
-                var moneyFlow: MoneyFlow = new MoneyFlow();
-                moneyFlow.addAmount(amount);
-                this.filteredMoneyFlowByDate.set(transactionDate, moneyFlow);
+                var curTransaction: Transaction = new Transaction(transactionDate);
+                curTransaction.addAmount(amount);
+                this.filteredTransactionByDate.set(transactionDate, curTransaction);
               }//if not in map, add it to filtered map
             }// add filters
           })
@@ -68,7 +69,7 @@ export class AppComponent {
         console.log('woa! ' + error)
       }, // On subscriber error 
       () => {
-        this.predictedMoneyFlowByDate = this.moneyFlowByDate;
+        this.predictedTransactionByDate = this.transactionByDate;
         predictiveService.search().subscribe(
           predictedTransactions => {
             if (typeof predictedTransactions != 'undefined') {
@@ -79,10 +80,10 @@ export class AppComponent {
 
                 let predictedAmount: number = predictedTransaction['amount'];
 
-                var predictedMoneyFlow: MoneyFlow = this.predictedMoneyFlowByDate.get(predictedTransactionDate);
-                predictedMoneyFlow.addAmount(predictedAmount);
+                var curPredictedTransaction: Transaction = this.predictedTransactionByDate.get(predictedTransactionDate);
+                curPredictedTransaction.addAmount(predictedAmount);
 
-                this.predictedMoneyFlowByDate.set(predictedTransactionDate, predictedMoneyFlow);
+                this.predictedTransactionByDate.set(predictedTransactionDate, curPredictedTransaction);
               })
             }
           }, // While receiving transactions
@@ -90,42 +91,46 @@ export class AppComponent {
             console.log('woa! ' + error)
           }, // On subscriber error 
           () => {
-            this.predictedMoneyFlowByDateObject = this.getMonthlyBalances(this.predictedMoneyFlowByDate);
-            console.log(this.predictedMoneyFlowByDateObject)
+            this.predictedTransactionByDateObject = this.getMonthlyBalances(this.predictedTransactionByDate);
+            console.log(this.predictedTransactionByDateObject)
           }
         )
 
-        this.moneyFlowByDateObject = this.getMonthlyBalances(this.moneyFlowByDate);
-        console.log(this.moneyFlowByDateObject)
+        this.transactionByDateObject = this.getMonthlyBalances(this.transactionByDate);
+        console.log(this.transactionByDateObject)
 
-        this.filteredMoneyFlowByDateObject = this.getMonthlyBalances(this.filteredMoneyFlowByDate);
-        console.log(this.filteredMoneyFlowByDateObject)
+        this.filteredTransactionByDateObject = this.getMonthlyBalances(this.filteredTransactionByDate);
+        console.log(this.filteredTransactionByDateObject)
 
       }//On subscriber succesful completion
     );
   }//Get transactions from service
 
-  private getMonthlyBalances(moneyFlowByDate: Map<string, MoneyFlow>) {
-    var balancesObject = {};
+  private getMonthlyBalances(transactionByDate: Map<string, Transaction>) {
+    var balancesObject = [];
     var spentAmount: number = 0;
     var gainedAmount: number = 0;
 
-    moneyFlowByDate.forEach((trans: MoneyFlow, date: string) => {
+    transactionByDate.forEach((trans: Transaction, date: string) => {
       let monthSpentAmount = trans.getSpent();
       spentAmount += monthSpentAmount;
 
-      let monthGainedAmount = trans.getGained();
+      let monthGainedAmount = trans.getIncome();
       gainedAmount += monthGainedAmount;
-      balancesObject[date] = { 'spent': '$' + this.formatAmount(monthSpentAmount), 'income': '$' + this.formatAmount(monthGainedAmount) };
+      balancesObject.push(trans);
     })//for each date, add it to the object
 
-    balancesObject['average'] = { 'spent': '$' + this.formatAmount(spentAmount / moneyFlowByDate.size), 'income': '$' + this.formatAmount(gainedAmount / moneyFlowByDate.size) };
+    var tempTransaction = new Transaction('Average');
+    tempTransaction.addAmount((-1) * spentAmount / transactionByDate.size);
+    tempTransaction.addAmount(gainedAmount / transactionByDate.size);
 
-    return JSON.stringify(balancesObject);
+    balancesObject.push(tempTransaction);
+
+    return balancesObject;
   }
 
-  private formatAmount(amount: number): string {
-    return (amount / 100).toFixed(2);
+  formatAmount(amount: number): string {
+    return '$' + (amount / 100).toFixed(2);
   } //Format transaction amounts to show decimals
 
   private formatMonth(month: number): string {

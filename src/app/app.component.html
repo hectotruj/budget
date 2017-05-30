@@ -1,3 +1,53 @@
-<h1>
-  {{moneyFlowByDateObject}}
-</h1>
+<div class="container">
+  <div class="col-md-4">
+    <table class="table">
+      <tr>
+        <th colspan="3" class="text-center">Original Transactions</th>
+      </tr>
+      <tr>
+        <th class="text-center">Date</th>
+        <th class="text-center">Income</th>
+        <th class="text-center">Spent</th>
+      </tr>
+      <tr *ngFor="let transactionByDate of transactionByDateObject">
+        <td>{{transactionByDate.name}}</td>
+        <td>{{formatAmount(transactionByDate.moneyFlow.income)}}</td>
+        <td>{{formatAmount(transactionByDate.moneyFlow.spent)}}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-md-4">
+    <table class="table col-md-4">
+      <tr>
+        <th colspan="3" class="text-center">Predicted Transactions</th>
+      </tr>
+      <tr>
+        <th class="text-center">Date</th>
+        <th class="text-center">Income</th>
+        <th class="text-center">Spent</th>
+      </tr>
+      <tr *ngFor="let predictedTransactionByDate of predictedTransactionByDateObject">
+        <td>{{predictedTransactionByDate.name}}</td>
+        <td>{{formatAmount(predictedTransactionByDate.moneyFlow.income)}}</td>
+        <td>{{formatAmount(predictedTransactionByDate.moneyFlow.spent)}}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-md-4">
+    <table class="table col-md-4">
+      <tr>
+        <th colspan="3" class="text-center">Donuts Filtered Transactions</th>
+      </tr>
+      <tr>
+        <th class="text-center">Date</th>
+        <th class="text-center">Income</th>
+        <th class="text-center">Spent</th>
+      </tr>
+      <tr *ngFor="let filteredTransactionByDate of filteredTransactionByDateObject">
+        <td>{{filteredTransactionByDate.name}}</td>
+        <td>{{formatAmount(filteredTransactionByDate.moneyFlow.income)}}</td>
+        <td>{{formatAmount(filteredTransactionByDate.moneyFlow.spent)}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
