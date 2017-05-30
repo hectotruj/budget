@@ -15,7 +15,7 @@ export class AppComponent {
   private predictedTransactionByDate: Map<string, Transaction>;
   private filteredTransactionByDate: Map<string, Transaction>;
 
-  transactionByDateObject: JSON[];
+  public transactionByDateObject: JSON[];
   predictedTransactionByDateObject: JSON[];
   filteredTransactionByDateObject: JSON[];
 
@@ -92,15 +92,15 @@ export class AppComponent {
           }, // On subscriber error 
           () => {
             this.predictedTransactionByDateObject = this.getMonthlyBalances(this.predictedTransactionByDate);
-            console.log(this.predictedTransactionByDateObject)
+            //console.log(this.predictedTransactionByDateObject)
           }
         )
 
         this.transactionByDateObject = this.getMonthlyBalances(this.transactionByDate);
-        console.log(this.transactionByDateObject)
+       // console.log(this.transactionByDateObject)
 
         this.filteredTransactionByDateObject = this.getMonthlyBalances(this.filteredTransactionByDate);
-        console.log(this.filteredTransactionByDateObject)
+        //console.log(this.filteredTransactionByDateObject)
 
       }//On subscriber succesful completion
     );
@@ -136,6 +136,4 @@ export class AppComponent {
   private formatMonth(month: number): string {
     return month < 10 ? '0' + month : month.toString();
   } //Format month to have leading 0
-
-  title = 'app works!';
 }
