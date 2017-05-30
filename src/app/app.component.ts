@@ -92,15 +92,15 @@ export class AppComponent {
           }, // On subscriber error 
           () => {
             this.predictedTransactionByDateObject = this.getMonthlyBalances(this.predictedTransactionByDate);
-            //console.log(this.predictedTransactionByDateObject)
+            console.log(this.predictedTransactionByDateObject)
           }
         )
 
         this.transactionByDateObject = this.getMonthlyBalances(this.transactionByDate);
-       // console.log(this.transactionByDateObject)
+        console.log(this.transactionByDateObject)
 
         this.filteredTransactionByDateObject = this.getMonthlyBalances(this.filteredTransactionByDate);
-        //console.log(this.filteredTransactionByDateObject)
+        console.log(this.filteredTransactionByDateObject)
 
       }//On subscriber succesful completion
     );
