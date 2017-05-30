@@ -11,8 +11,8 @@
       </tr>
       <tr *ngFor="let transactionByDate of transactionByDateObject">
         <td>{{transactionByDate.name}}</td>
-        <td>{{formatAmount(transactionByDate.moneyFlow.income)}}</td>
-        <td>{{formatAmount(transactionByDate.moneyFlow.spent)}}</td>
+        <td class="success">{{formatAmount(transactionByDate.moneyFlow.income)}}</td>
+        <td class="danger">{{formatAmount(transactionByDate.moneyFlow.spent)}}</td>
       </tr>
     </table>
   </div>
@@ -28,8 +28,8 @@
       </tr>
       <tr *ngFor="let predictedTransactionByDate of predictedTransactionByDateObject">
         <td>{{predictedTransactionByDate.name}}</td>
-        <td>{{formatAmount(predictedTransactionByDate.moneyFlow.income)}}</td>
-        <td>{{formatAmount(predictedTransactionByDate.moneyFlow.spent)}}</td>
+        <td class="success">{{formatAmount(predictedTransactionByDate.moneyFlow.income)}}</td>
+        <td class="danger">{{formatAmount(predictedTransactionByDate.moneyFlow.spent)}}</td>
       </tr>
     </table>
   </div>
@@ -45,8 +45,8 @@
       </tr>
       <tr *ngFor="let filteredTransactionByDate of filteredTransactionByDateObject">
         <td>{{filteredTransactionByDate.name}}</td>
-        <td>{{formatAmount(filteredTransactionByDate.moneyFlow.income)}}</td>
-        <td>{{formatAmount(filteredTransactionByDate.moneyFlow.spent)}}</td>
+        <td class="success">{{formatAmount(filteredTransactionByDate.moneyFlow.income)}}</td>
+        <td class="danger">{{formatAmount(filteredTransactionByDate.moneyFlow.spent)}}</td>
       </tr>
     </table>
   </div>
